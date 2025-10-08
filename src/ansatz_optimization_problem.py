@@ -3,6 +3,8 @@ import torch
 import random
 from pymoo.core.problem import ElementwiseProblem
 from pymoo.core.sampling import Sampling
+from pymoo.core.crossover import Crossover
+from pymoo.core.mutation import Mutation
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, roc_auc_score, roc_curve, auc
 import numpy as np
 from quantum import train_model, test_model, QuantumModel, QuanvLayer
@@ -45,3 +47,4 @@ class QuantumCircuitSampling(Sampling):
             X.append(tensor_network)
 
         return np.array(X)
+    
