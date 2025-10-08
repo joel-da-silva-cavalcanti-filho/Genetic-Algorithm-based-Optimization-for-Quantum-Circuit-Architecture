@@ -1,15 +1,17 @@
-import torch
+import torch.nn
 import cmath
 import math
+from quantum_circuit_tensor import circuit
 
 class QuanvLayer(nn.Module):
-    def __init__(self, n_qubits, n_layers, patch_size, mode="both"):
+    def __init__(self, n_qubits, n_layers, patch_size, mode="both", chromossome):
         super().__init__()
         self.n_qubits = n_qubits
         self.n_layers = n_layers
         self.patch_size = patch_size
+        self.chromossome = chromossome
         self.mode = mode
-
+        self.qlayer = circuit(chromossome, n_qubits)
         #self.dev = qml.device("lightning.gpu", wires=n_qubits)
 
         # Como definir o meu circuito em termos de tensores?
@@ -25,6 +27,12 @@ class QuanvLayer(nn.Module):
         self.qlayer = qml.qnn.TorchLayer(self.qnode, weight_shapes)
         
         """
+
+        """
+
+
+        """
+
     def quanv1d_horizontal(self, x):
         B, C, H, W = x.shape
         out_w = W // self.patch_size

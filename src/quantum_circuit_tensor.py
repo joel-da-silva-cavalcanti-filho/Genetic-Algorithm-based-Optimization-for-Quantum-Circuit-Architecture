@@ -36,4 +36,16 @@ gate_operation = {
     'hadamard': hadamard_gate
 }
 
-def circuit(input_state)
+
+def circuit(chromossome, weights):
+    new_state_vector = []
+    target_qubit = 0
+    for wire in chromossome:
+        next_state = weights[target_qubit]
+        for gate_name in wire:
+            gate = gate_operation[gate_name]
+            next_state = torch.tensordot(gate, next_state, dims=([1],[target_qubit]))
+        new_state_vector.append(next_state)
+        target_qubit+=1
+
+    return next_state
