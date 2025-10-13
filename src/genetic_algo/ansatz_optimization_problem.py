@@ -5,12 +5,13 @@ from pymoo.core.problem import ElementwiseProblem
 from pymoo.core.sampling import Sampling
 from pymoo.core.crossover import Crossover
 from pymoo.core.mutation import Mutation
+from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, roc_auc_score, roc_curve, auc
 import numpy as np
 from quantum import train_model, test_model, QuantumModel, QuanvLayer
 
 class QuantumCircuitOptimization(ElementwiseProblem):
-    def __init__(self, n_qubits, n_gates, possible_gates, n_layers, patch_size, n_classes, input_size, mode):
+    def __init__(self, n_qubits, n_gates, possible_gates, n_layers, patch_size, n_classes, input_size, mode, max_gates):
         super().__init__(n_var= n_qubits,
                          n_obj=1,
                          n_ieq_constr=0)
@@ -22,14 +23,36 @@ class QuantumCircuitOptimization(ElementwiseProblem):
         self.n_classes = n_classes
         self.input_size = input_size 
         self.mode = mode
+        self.max_gates = max_gates
         
     def _evaluate(self, x, out, *args, **kwargs):
-        quantum_layer = QuanvLayer(self.n_qubits,  self.n_layers, self.patch_size, x)
-        quantum_model = QuantumModel(quantum_layer, self.patch_size, self.n_qubits, self.mode)
-        # Train my model here
-        train_model(quantum_model, )
-        f1 = test_model()
-        out["F"] = -f1
+
+        # Amount of layers * # of qubits
+        ansatz_depth = len(x) * self.n_qubits
+        if ansatz_depth > self.max_gates:
+            out["F"] = max(0, ansatz_depth - self.max_gates)
+        else:
+            # Generate quantum circuit, make the quanvolutions, flatten all the state vectors and fit it in a SVM with linear kernel to check for linear separability 
+            # For the quanvolutions, make deterministic sampling of patches for the evaluation
+            vector_state_training_data = np.array([0])
+            tomography_labels = np.array([0])
+            quantum_layer = QuanvLayer(self.n_qubits,  self.n_layers, self.patch_size, x)
+            quantum_model = QuantumModel(quantum_layer, self.patch_size, self.n_qubits, self.mode)
+
+
+            # Train my model here to check linear separability
+            linear_SVM = SVC(kernel='linear')
+            linear_SVM.fit(vector_state_training_data, tomography_labels)
+
+            model_accuracy = linear_SVM.score(vector_state_training_data, tomography_labels)
+            
+            w = linear_SVM.coef_.flatten()
+            margin = 1/np.linalg.norm(w)
+
+        
+            out["F"] = -model_accuracy
+
+# Gotta test if sampling is working
 
 class QuantumCircuitSampling(Sampling):
     def _do(self, problem, n_samples, **kwargs):
