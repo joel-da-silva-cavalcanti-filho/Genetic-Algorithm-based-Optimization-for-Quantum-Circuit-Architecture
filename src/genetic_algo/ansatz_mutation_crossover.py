@@ -3,7 +3,10 @@ from pymoo.core.mutation import Mutation
 from pymoo.core.duplicate import ElementwiseDuplicateElimination
 import numpy as np
 import random
+from math import sqrt
+from torch import tensor, inner
 from mutation_operators import swap_cnot_gate, change_cnot_gate_to_one_qubit_gates
+from ansatz_simulation_class import AnsatzSimulation
 
 # Gotta test AnsatzMutation
 
@@ -94,36 +97,37 @@ class AnsatzCrossover(Crossover):
             offsprings.append(offspring_b)
         
         return offsprings
-       # _, n_matings, n_var = X.shape
-
-        # The output owith the shape (n_offsprings, n_matings, n_var)
-        # Because there the number of parents and offsprings are equal it keeps the shape of X
-        #Y = np.full_like(X, None, dtype=object)
-
-        # for each mating provided
-        #for k in range(n_matings):
-
-            # get the first and the second parent
-        #    a, b = X[0, k, 0], X[1, k, 0]
-
-            # prepare the offsprings
-            #off_a = ["_"] * problem.n_characters
-            #off_b = ["_"] * problem.n_characters
-
-            #for i in range(problem.n_characters):
-            #   if np.random.random() < 0.5:
-            #        off_a[i] = a[i]
-             #       off_b[i] = b[i]
-             #   else:
-             #       off_a[i] = b[i]
-             #       off_b[i] = a[i]
-
-            # join the character list and set the output
-            #Y[0, k, 0], Y[1, k, 0] = "".join(off_a), "".join(off_b)
-
-        #return Y
     
     class RemoveEquivalentAnsätze(ElementwiseDuplicateElimination):
 
+        state_vector_1 = tensor()
+        state_vector_2 = tensor()
+        state_vector_3 = tensor()
+        state_vector_toy_test = []
+        threshold_value = 0.7
+        
+        def test_ansatz(self, ansatz, state_vector):
+            ansatz_equivalence = AnsatzSimulation()
+            return ansatz_equivalence.simulate_circuit(state_vector, ansatz_chromosome=ansatz)
+             
+        # Check whether i calculate the inner product with just the real parts or should i include the imaginary ones as well
+        def inner_product(self, state_vector_psi, state_vector_phi):
+            return inner(state_vector_psi, state_vector_phi)
+        
+        def fidelity(self, state_vector_psi, state_vector_phi):
+            return self.inner_product(state_vector_psi, state_vector_phi)**2
+        
+        def trace_distance(self, state_vector_psi, state_vector_phi):
+            return sqrt(1 - self.inner_product(state_vector_psi, state_vector_phi)**2)
+        
+        def euclidian_distance(self, state_vector_psi, state_vector_phi):
+            return sqrt(2 - 2*self.inner_product(state_vector_psi.real, state_vector_phi.real))
+        
+        # Decide which measure should be used in order to evaluate the
+        
         def is_equal(self, ansatz_a, ansatz_b):
-            return False
+            for state_vector in self.state_vector_toy_test:
+                output_state_vector_a = self.test_ansatz(ansatz_a, state_vector)
+                output_state_vector_b = self.test_ansatz(ansatz_b, state_vector)
+            
+    

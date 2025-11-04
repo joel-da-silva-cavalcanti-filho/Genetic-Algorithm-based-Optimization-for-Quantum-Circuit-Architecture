@@ -1,7 +1,7 @@
 import torch.nn
 import cmath
 import math
-from quantum_circuit_tensor import circuit
+from ansatz_simulation_class import AnsatzSimulation
 
 class QuanvLayer(nn.Module):
     def __init__(self, n_qubits, n_layers, patch_size, mode="both", chromossome):
