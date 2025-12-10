@@ -51,6 +51,14 @@ class AnsatzSimulation():
         'hadamard': hadamard_gate
     }
     
+    non_parametrized_gates = {
+        'pauli_x': pauli_x_gate,
+        'pauli_y': pauli_y_gate,
+        'pauli_z': pauli_z_gate,
+        'phase': phase_gate,
+        't': t_gate,
+        'hadamard': hadamard_gate
+    }
 
     def __init__(self, n_qubits: int):
         self.n_qubits = n_qubits
@@ -152,20 +160,29 @@ class AnsatzSimulation():
     # Also for simulating a controlled not gate, just do the tensor product between dims=([2,3], [control, target])
     # Tensor product between gates of the same layer would be better tbh, so just do
 
-    def simulate_one_qubit_gate(self, selected_gate: str, state_vector: torch.Tensor, selected_qubit:int) -> tensor:
+    def simulate_one_qubit_gate(self, selected_gate: torch.Tensor, state_vector: torch.Tensor, selected_qubit:int) -> tensor:
         return tensordot(selected_gate, state_vector, dims=([1],[selected_qubit]))
     
     def simulate_cnot(self, state_vector: torch.Tensor, target_qubit: int, control_qubit: int) -> tensor:
         return tensordot(self.cnot_gate, state_vector, dims=([2,3],[control_qubit, target_qubit]))
 
-    def measureState(self, state_vector: torch.Tensor) -> float:
-        state_vector = torch.reshape(state_vector, shape=(2**self.n_qubits, ))
+    # Fix pauli Z measurement
+
+    def pauliZ_expectationValue(self, state_vector: torch.Tensor, qubit_index: int) -> float:
+        #state_vector = torch.reshape(state_vector, shape=(2**self.n_qubits, ))
+        print(f'Measuring wire #{qubit_index}...')
         probability_tensor = torch.abs(state_vector)**2
-        random_state_index = torch.multinomial(input=probability_tensor, num_samples=1, replacement=False)
-        return probability_tensor[random_state_index]
+        bit_string = f'{qubit_index:0{self.n_qubits}b}'
+        print(f'This wire bitstring: {bit_string}')
+        expectation = 0.
+        for index in range(len(bit_string)):
+            bit_value = int(bit_string[index])
+            expectation += probability_tensor[index]*(-1**bit_value)
+        
+        return expectation
         
 
-    def simulate_circuit(self, state_vector: torch.Tensor, ansatz_chromosome: list) -> tensor:
+    def simulate_circuit(self, state_vector: torch.Tensor, ansatz_chromosome: list) -> float:
         layer_count = 0
         for layer in ansatz_chromosome:
             print(f'Starting simulation at layer #{layer_count}')
@@ -195,5 +212,6 @@ class AnsatzSimulation():
                 qubit_count+=1
             layer_count+=1
 
-        return self.measureState(state_vector)
+        
+        return [self.pauliZ_expectationValue(state_vector, qubit_index) for qubit_index in range(self.n_qubits)]
     
