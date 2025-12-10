@@ -2,6 +2,7 @@ import torch.nn
 import cmath
 import math
 from ansatz_simulation_class import AnsatzSimulation
+from sklearn.feature_extraction import image
 
 class QuanvLayer(nn.Module):
     def __init__(self, n_qubits, n_layers, patch_size, mode="both", chromossome):
@@ -11,7 +12,7 @@ class QuanvLayer(nn.Module):
         self.patch_size = patch_size
         self.chromossome = chromossome
         self.mode = mode
-        self.qlayer = circuit(chromossome, n_qubits)
+        self.qlayer = AnsatzSimulation(n_qubits)
         #self.dev = qml.device("lightning.gpu", wires=n_qubits)
 
         # Como definir o meu circuito em termos de tensores?
@@ -32,6 +33,16 @@ class QuanvLayer(nn.Module):
 
 
         """
+
+    def quanv_2d(self, x):
+        patches = image.extract_patches_2d(x, (self.patch_size, self.patch_size))
+        outputs = []
+    
+        for patch in patches:
+            expval = self.qlayer.simulate_circuit(torch(patch), self.chromossome)
+            outputs.append(expval)
+
+        return outputs
 
     def quanv1d_horizontal(self, x):
         B, C, H, W = x.shape

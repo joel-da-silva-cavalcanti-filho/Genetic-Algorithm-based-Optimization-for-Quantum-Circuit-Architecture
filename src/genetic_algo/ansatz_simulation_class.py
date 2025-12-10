@@ -1,22 +1,22 @@
 import torch
 import math
 import cmath
-from torch import tensor, tensordot
+from torch import tensor, tensordot, cat
 import random
 
 class AnsatzSimulation():
 
     H = [[(1/math.sqrt(2)), (1/math.sqrt(2))], [(1/math.sqrt(2)), -(1/math.sqrt(2))]]
-    theta_value = 2*math.pi
+    theta = math.pi/2
 
     hadamard_gate = tensor(H, dtype=torch.complex64)
 
-    rx_gate = tensor([[math.cos(theta_value/2), -1j*math.sin(theta_value/2)],
-                            [-1j*math.sin(theta_value/2), math.cos(theta_value/2)]], dtype=torch.complex64)
+    rx_gate = tensor([[math.cos(theta/2), -1j*math.sin(theta/2)],
+                            [-1j*math.sin(theta/2), math.cos(theta/2)]], dtype=torch.complex64)
 
-    ry_gate = tensor([[math.cos(theta_value/2), -math.sin(theta_value/2)], [math.sin(theta_value/2), math.cos(theta_value/2)]], dtype=torch.complex64)
+    ry_gate = tensor([[math.cos(theta/2), -math.sin(theta/2)], [math.sin(theta/2), math.cos(theta/2)]], dtype=torch.complex64)
 
-    rz_gate = tensor([[-cmath.exp(-1.0j*theta_value/2), 0.0], [0.0, cmath.exp(-1.0j*theta_value/2)]], dtype=torch.complex64)
+    rz_gate = tensor([[-cmath.exp(-1.0j*theta/2), 0.0], [0.0, cmath.exp(-1.0j*theta/2)]], dtype=torch.complex64)
     
     pauli_x_gate = tensor([[0.0, 1.0],[1.0 ,0.0]], dtype=torch.complex64)
 
@@ -38,7 +38,7 @@ class AnsatzSimulation():
          [[0.+0.j, 0.+0.j],
           [1.+0.j, 0.+0.j]]]], dtype=torch.complex64)
     
-
+   
     gate_operation = {
         'pauli_x': pauli_x_gate,
         'pauli_y': pauli_y_gate,
@@ -167,20 +167,23 @@ class AnsatzSimulation():
         return tensordot(self.cnot_gate, state_vector, dims=([2,3],[control_qubit, target_qubit]))
 
     # Fix pauli Z measurement
+    def pauliZ_test(self, state_vector, qubit_index):
+        bitmask = 1 << qubit_index
+        conjugated_state_vector = torch.conj(state_vector)
 
-    def pauliZ_expectationValue(self, state_vector: torch.Tensor, qubit_index: int) -> float:
-        #state_vector = torch.reshape(state_vector, shape=(2**self.n_qubits, ))
-        print(f'Measuring wire #{qubit_index}...')
-        probability_tensor = torch.abs(state_vector)**2
-        bit_string = f'{qubit_index:0{self.n_qubits}b}'
-        print(f'This wire bitstring: {bit_string}')
-        expectation = 0.
-        for index in range(len(bit_string)):
-            bit_value = int(bit_string[index])
-            expectation += probability_tensor[index]*(-1**bit_value)
+        for index in range(0, 2**self.n_qubits):
+            if index & bitmask != 0:
+                state_vector[index] = -state_vector[index]
+
+        return torch.sum(conjugated_state_vector * state_vector)
+    
+    def pauliZ_expectationValue(self, state_vector, qubit_index):
+        indices = torch.arange(2**self.n_qubits)
+        signs = 1 - 2*((indices >> qubit_index) & 1)  # +1 for 0, -1 for 1
+        expectation = torch.sum(signs * torch.abs(state_vector)**2)
         
         return expectation
-        
+
 
     def simulate_circuit(self, state_vector: torch.Tensor, ansatz_chromosome: list) -> float:
         layer_count = 0
