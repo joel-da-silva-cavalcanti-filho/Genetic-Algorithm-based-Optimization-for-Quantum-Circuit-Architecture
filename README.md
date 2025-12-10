@@ -1,1 +1,1 @@
-# Genetic-Algorithm-based-Optimization-for-Quantum-Circuit-Synthesis
+# Genetic-Algorithm-based-Optimization-for-Quantum-Circuit-Architecture
