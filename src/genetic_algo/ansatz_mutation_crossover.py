@@ -3,6 +3,7 @@ from pymoo.core.mutation import Mutation
 from pymoo.core.duplicate import ElementwiseDuplicateElimination
 import numpy as np
 import random
+import time
 from math import sqrt
 from torch import tensor, inner
 from mutation_operators import swap_cnot_gate, change_cnot_gate_to_one_qubit_gates

@@ -3,21 +3,16 @@ import math
 import cmath
 from torch import tensor, tensordot, cat
 import random
+import time
 
 class AnsatzSimulation():
 
+
     H = [[(1/math.sqrt(2)), (1/math.sqrt(2))], [(1/math.sqrt(2)), -(1/math.sqrt(2))]]
-    theta = math.pi/2
 
     hadamard_gate = tensor(H, dtype=torch.complex64)
 
-    rx_gate = tensor([[math.cos(theta/2), -1j*math.sin(theta/2)],
-                            [-1j*math.sin(theta/2), math.cos(theta/2)]], dtype=torch.complex64)
 
-    ry_gate = tensor([[math.cos(theta/2), -math.sin(theta/2)], [math.sin(theta/2), math.cos(theta/2)]], dtype=torch.complex64)
-
-    rz_gate = tensor([[-cmath.exp(-1.0j*theta/2), 0.0], [0.0, cmath.exp(-1.0j*theta/2)]], dtype=torch.complex64)
-    
     pauli_x_gate = tensor([[0.0, 1.0],[1.0 ,0.0]], dtype=torch.complex64)
 
     pauli_y_gate = tensor([[0.0, -1.0j], [1.0j, 0.0]],dtype=torch.complex64)
@@ -39,18 +34,7 @@ class AnsatzSimulation():
           [1.+0.j, 0.+0.j]]]], dtype=torch.complex64)
     
    
-    gate_operation = {
-        'pauli_x': pauli_x_gate,
-        'pauli_y': pauli_y_gate,
-        'pauli_z': pauli_z_gate,
-        'rx_gate': rx_gate,
-        'ry_gate': ry_gate,
-        'rz_gate': rz_gate,
-        'phase': phase_gate,
-        't': t_gate,
-        'hadamard': hadamard_gate
-    }
-    
+
     non_parametrized_gates = {
         'pauli_x': pauli_x_gate,
         'pauli_y': pauli_y_gate,
@@ -65,48 +49,32 @@ class AnsatzSimulation():
 
     # Could do the embedding changing the rotation gates for each angle
 
-    def rx_rotation_states(self, patch_vector):
-        qubit_count = 0
-        for theta_value in patch_vector:
-            if qubit_count == 0:
-                initial_state_vector = tensor([[math.cos(theta_value/2), -1j*math.sin(theta_value/2)],
-                        [-1j*math.sin(theta_value/2), math.cos(theta_value/2)]], dtype=torch.complex64)
-            else:
-                psi = tensor([[math.cos(theta_value/2), -1j*math.sin(theta_value/2)],
-                        [-1j*math.sin(theta_value/2), math.cos(theta_value/2)]], dtype=torch.complex64)
-                initial_state_vector = torch.kron(initial_state_vector, psi)
+    def rx_gate(self, theta = math.pi/2):
+        return tensor([[math.cos(theta/2), -1j*math.sin(theta/2)],
+                            [-1j*math.sin(theta/2), math.cos(theta/2)]], dtype=torch.complex64)
 
-            qubit_count += 1
+    def ry_gate(self, theta = math.pi/2):
+        return tensor([[math.cos(theta/2), -math.sin(theta/2)], [math.sin(theta/2), math.cos(theta/2)]], dtype=torch.complex64)
 
-        return initial_state_vector
-       
-
-    def ry_rotation_states(self, patch_vector):
-        qubit_count = 0
-        for theta_value in patch_vector:
-            if qubit_count == 0:
-                initial_state_vector = tensor([[math.cos(theta_value/2), -math.sin(theta_value/2)], [math.sin(theta_value/2), math.cos(theta_value/2)]], dtype=torch.complex64)
-            else:
-                psi = tensor([[math.cos(theta_value/2), -math.sin(theta_value/2)], [math.sin(theta_value/2), math.cos(theta_value/2)]], dtype=torch.complex64)
-                initial_state_vector = torch.kron(initial_state_vector, psi)
-
-            qubit_count += 1
-
-        return initial_state_vector
+    def rz_gate(self, theta = math.pi/2):
+        return tensor([[-cmath.exp(-1.0j*theta/2), 0.0], [0.0, cmath.exp(-1.0j*theta/2)]], dtype=torch.complex64)
     
-    def rz_rotation_states(self, patch_vector):
-        qubit_count = 0
-        for theta_value in patch_vector:
-            if qubit_count == 0:
-                initial_state_vector = tensor([[-cmath.exp(-1.0j*theta_value/2), 0.0], [0.0, cmath.exp(-1.0j*theta_value/2)]], dtype=torch.complex64)
+    gate_operation = {
+        'pauli_x': pauli_x_gate,
+        'pauli_y': pauli_y_gate,
+        'pauli_z': pauli_z_gate,
+        'phase': phase_gate,
+        't': t_gate,
+        'hadamard': hadamard_gate
+    }
 
-            else:
-                psi = tensor([[-cmath.exp(-1.0j*theta_value/2), 0.0], [0.0, cmath.exp(-1.0j*theta_value/2)]], dtype=torch.complex64)
-                initial_state_vector = torch.kron(initial_state_vector, psi)
+    def rotation_states(self, patch_vector, rotation_gate):
+        state_vector = self.rx_gate(patch_vector[0])
+        for index in range(0, len(patch_vector) - 1):
+            state_vector = torch.kron(state_vector, rotation_gate(patch_vector[index+1]))
 
-            qubit_count += 1
-
-        return initial_state_vector
+        return state_vector
+       
     
     def rx_state(self, angle):
         return tensor([[math.cos(angle/2), -1j*math.sin(angle/2)],
@@ -145,13 +113,12 @@ class AnsatzSimulation():
         eye_tensor = torch.zeros(2**self.n_qubits, dtype=torch.complex64)
         eye_tensor[0] = 1.0
         if rotation_gate == 'rx':
-            return self.rx_rotation_states(patch_vector) @ eye_tensor
-
+            return self.rotation_states(patch_vector, self.rx_gate) @ eye_tensor
         elif rotation_gate == 'ry':
-            return self.ry_rotation_states(patch_vector) @ eye_tensor
+            return self.rotation_states(patch_vector, self.ry_gate) @ eye_tensor
 
         elif rotation_gate == 'rz':
-            return self.rz_rotation_states(patch_vector)  @ eye_tensor
+            return self.rotation_states(patch_vector, self.rz_gate)  @ eye_tensor
         
 
     # Instead of simulating one qubit gate per time just do kronecker product to create a layer of quantum gates
@@ -162,9 +129,13 @@ class AnsatzSimulation():
 
     def simulate_one_qubit_gate(self, selected_gate: torch.Tensor, state_vector: torch.Tensor, selected_qubit:int) -> tensor:
         return tensordot(selected_gate, state_vector, dims=([1],[selected_qubit]))
-    
+
     def simulate_cnot(self, state_vector: torch.Tensor, target_qubit: int, control_qubit: int) -> tensor:
         return tensordot(self.cnot_gate, state_vector, dims=([2,3],[control_qubit, target_qubit]))
+
+    def simulate_rotation_gate(self, selected_gate, state_vector, selected_qubit, angle=math.pi/2):
+        rotation_tensor = self.rotation_function[selected_gate](self, angle)
+        return tensordot(rotation_tensor, state_vector, dims=([1],[selected_qubit]))
 
     # Fix pauli Z measurement
     def pauliZ_test(self, state_vector, qubit_index):
@@ -185,16 +156,21 @@ class AnsatzSimulation():
         return expectation
 
 
-    def simulate_circuit(self, state_vector: torch.Tensor, ansatz_chromosome: list) -> float:
+    def simulate_circuit(self, input: torch.Tensor, embedding_type: str, ansatz_chromosome: list) -> float:
         layer_count = 0
+
+        state_vector = self.uniformAngleEmbedding(input, embedding_type).reshape((2,)*self.n_qubits)
+        
         for layer in ansatz_chromosome:
-            print(f'Starting simulation at layer #{layer_count}')
+            #print(f'Starting simulation at layer #{layer_count}')
             qubit_count = 0
             cnot_stack = []
             for gate in layer:
-                print(f'Starting simulation at qubit {qubit_count}... ')
+                #print(f'Starting simulation at qubit {qubit_count}... ')
                 if gate in self.gate_operation:
                     state_vector = self.simulate_one_qubit_gate(self.gate_operation[gate], state_vector, qubit_count)
+                elif gate in self.rotation_function:
+                    state_vector = self.simulate_rotation_gate(gate, state_vector, qubit_count)
                 elif gate is not None:
                     if gate[0:4] == 'ctrl' or gate[0:4] == 'trgt':
                         if not cnot_stack:
@@ -211,10 +187,11 @@ class AnsatzSimulation():
                             state_vector = self.simulate_cnot(state_vector, target_qubit, control_qubit)
                             cnot_stack.pop()
 
-                print(f'Simulation at qubit {qubit_count} done!')
+                #print(f'Simulation at qubit {qubit_count} done!')
+
                 qubit_count+=1
             layer_count+=1
 
-        
+        state_vector = state_vector.reshape(-1)
         return [self.pauliZ_expectationValue(state_vector, qubit_index) for qubit_index in range(self.n_qubits)]
     
