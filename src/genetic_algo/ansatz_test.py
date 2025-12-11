@@ -13,14 +13,8 @@ def main():
     end_time = time.perf_counter()
     duration = end_time - start_time
     print(f"The ansatz simulation executed in {duration:.4f} seconds")
-    #measurement = [my_ansatz.pauliZ_expectationValue(state_vector, i) for i in range(n_qubits)]
-    #state_vector = torch.reshape(state_vector, shape=(2,2,2,2))
     print(measurement)
-    #pauli_x = my_ansatz.pauli_x_gate
-    #new_state_vector = my_ansatz.simulate_one_qubit_gate(pauli_x, state_vector, 2)
-    #chromossome = [['ctrl_0', 'trgt_0', 'ctrl_1', 'trgt_1'], [None, 'ctrl_0', 'trgt_0', None], ['rz_gate', 'pauli_y', 'rx_gate', 'phase']]
-    #new_state_vector = my_ansatz.simulate_circuit(state_vector, chromossome)
-    #print(f'new state vector:\n{new_state_vector}')
+   
     
 if __name__ == '__main__':
     main()

@@ -159,7 +159,7 @@ class AnsatzSimulation():
     def simulate_circuit(self, input: torch.Tensor, embedding_type: str, ansatz_chromosome: list) -> float:
         layer_count = 0
 
-        state_vector = self.uniformAngleEmbedding(input, embedding_type).reshape((2,)*self.n_qubits)
+        state_vector = self.uniformAngleEmbedding(input, embedding_type).view((2,)*self.n_qubits)
         
         for layer in ansatz_chromosome:
             #print(f'Starting simulation at layer #{layer_count}')
@@ -192,6 +192,6 @@ class AnsatzSimulation():
                 qubit_count+=1
             layer_count+=1
 
-        state_vector = state_vector.reshape(-1)
+        state_vector = state_vector.view(-1)
         return [self.pauliZ_expectationValue(state_vector, qubit_index) for qubit_index in range(self.n_qubits)]
     
