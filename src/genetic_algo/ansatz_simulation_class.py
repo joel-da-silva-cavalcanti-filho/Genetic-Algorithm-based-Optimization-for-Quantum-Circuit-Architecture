@@ -69,7 +69,7 @@ class AnsatzSimulation():
     }
 
     def rotation_states(self, patch_vector, rotation_gate):
-        state_vector = self.rx_gate(patch_vector[0])
+        state_vector = rotation_gate(patch_vector[0])
         for index in range(0, len(patch_vector) - 1):
             state_vector = torch.kron(state_vector, rotation_gate(patch_vector[index+1]))
 
@@ -156,7 +156,7 @@ class AnsatzSimulation():
         return expectation
 
 
-    def simulate_circuit(self, input: torch.Tensor, embedding_type: str, ansatz_chromosome: list) -> float:
+    def simulate_circuit(self, input: torch.Tensor, embedding_type: str, ansatz_chromosome: list):
         layer_count = 0
 
         state_vector = self.uniformAngleEmbedding(input, embedding_type).view((2,)*self.n_qubits)

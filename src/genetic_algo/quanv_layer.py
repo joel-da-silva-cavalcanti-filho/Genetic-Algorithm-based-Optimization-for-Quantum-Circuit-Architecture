@@ -1,11 +1,12 @@
-import torch.nn
+import torch.nn as nn
+import torch
 import cmath
 import math
 from ansatz_simulation_class import AnsatzSimulation
 from sklearn.feature_extraction import image
 
 class QuanvLayer(nn.Module):
-    def __init__(self, n_qubits, n_layers, patch_size, mode="both", chromossome):
+    def __init__(self, n_qubits, n_layers, patch_size,chromossome, mode="both"):
         super().__init__()
         self.n_qubits = n_qubits
         self.n_layers = n_layers
@@ -38,6 +39,7 @@ class QuanvLayer(nn.Module):
         patches = image.extract_patches_2d(x, (self.patch_size, self.patch_size))
         outputs = []
     
+        
         for patch in patches:
             expval = self.qlayer.simulate_circuit(torch(patch), self.chromossome)
             outputs.append(expval)
