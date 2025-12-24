@@ -25,13 +25,7 @@ class QuanvLayer(nn.Module):
     def quanv_2d(self, x):
         #print(type(x))
         start_time = time.perf_counter()
-        patched_images = tensor(np.array([image.extract_patches_2d(img, (self.patch_size, self.patch_size)) for img in x]))
-        n_images, n_patches, patch_height, patch_width = patched_images.shape
-        patched_images = patched_images.contiguous().view(n_images, n_patches, patch_height*patch_width)
-        end_time = time.perf_counter()
-        print(f'Patch crafting time: {end_time - start_time}')
-        start_time = time.perf_counter()
-        outputs = [[self.qlayer.simulate_circuit(patch, 'rx', self.chromosome) for patch in patches] for patches in patched_images]
+        outputs = [[self.qlayer.simulate_circuit(patch, 'rx', self.chromosome) for patch in patches] for patches in x]
         end_time = time.perf_counter()
         print(f'Image quantum processing time: {end_time - start_time}')
 
@@ -134,9 +128,7 @@ class QuantumModel(nn.Module):
         self.mode = mode
 
         
-        dummy_input = np.zeros(shape=(input_size, input_size))
-        n_patches = tensor(image.extract_patches_2d(dummy_input, (patch_size, patch_size))).shape[0]
-        feat_size = n_patches * (patch_size**2)
+        feat_size = input_size**2
 
         self.fc1 = nn.Linear(feat_size, 64)
         self.fc2 = nn.Linear(64, num_classes)
