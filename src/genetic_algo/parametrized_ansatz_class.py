@@ -15,6 +15,8 @@ class ParametrizedAnsatz(AnsatzSimulation):
 
     def calculate_number_parameters(self, ansatz_chromosome: list) -> int:
         angle_count = 0
+        
+        
         for layer in ansatz_chromosome:
             for gate in layer:
                 if gate == 'rx' or gate == 'ry' or gate == 'rz':

@@ -158,7 +158,8 @@ class AnsatzSimulation():
 
     def simulate_circuit(self, input: torch.Tensor, embedding_type: str, ansatz_chromosome: list):
         layer_count = 0
-
+        #print('Starting ansatz simulation...')
+        #start_time = time.perf_counter()
         state_vector = self.uniformAngleEmbedding(input, embedding_type).view((2,)*self.n_qubits)
         
         for layer in ansatz_chromosome:
@@ -170,7 +171,8 @@ class AnsatzSimulation():
                 if gate in self.gate_operation:
                     state_vector = self.simulate_one_qubit_gate(self.gate_operation[gate], state_vector, qubit_count)
                 elif gate in self.rotation_function:
-                    state_vector = self.simulate_rotation_gate(gate, state_vector, qubit_count)
+                    random_angle = random.uniform(0.0, 1.5)*math.pi
+                    state_vector = self.simulate_rotation_gate(gate, state_vector, qubit_count, random_angle)
                 elif gate is not None:
                     if gate[0:4] == 'ctrl' or gate[0:4] == 'trgt':
                         if not cnot_stack:
@@ -193,5 +195,7 @@ class AnsatzSimulation():
             layer_count+=1
 
         state_vector = state_vector.view(-1)
+        #end_time = time.perf_counter()
+        #print(f'Simulation processing time: {end_time - start_time}')
         return [self.pauliZ_expectationValue(state_vector, qubit_index) for qubit_index in range(self.n_qubits)]
     

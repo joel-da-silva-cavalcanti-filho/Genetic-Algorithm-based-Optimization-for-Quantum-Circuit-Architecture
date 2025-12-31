@@ -24,10 +24,10 @@ class QuanvLayer(nn.Module):
         
     def quanv_2d(self, x):
         #print(type(x))
-        start_time = time.perf_counter()
+        #start_time = time.perf_counter()
         outputs = [[self.qlayer.simulate_circuit(patch, 'rx', self.chromosome) for patch in patches] for patches in x]
-        end_time = time.perf_counter()
-        print(f'Image quantum processing time: {end_time - start_time}')
+        #end_time = time.perf_counter()
+        #print(f'Image quantum processing time: {end_time - start_time}')
 
         return tensor(outputs)
 
@@ -148,7 +148,7 @@ class QuantumModel(nn.Module):
         return F.log_softmax(x, dim=1)
 
 def train_model(model, train_loader, criterion, optimizer, device, num_epochs=10, log_interval=50):
-    model.to(device)
+    model.to(device)    
     history = {"train_loss": [], "train_acc": []}
 
     for epoch in range(num_epochs):
@@ -159,8 +159,8 @@ def train_model(model, train_loader, criterion, optimizer, device, num_epochs=10
 
         pbar = tqdm(enumerate(train_loader), total=len(train_loader), desc=f"Epoch {epoch+1}/{num_epochs}")
         for batch_idx, (images, labels) in pbar:
-            images = images.to(device)
-            labels = labels.squeeze().to(device)
+            #images = images.to(device)
+            #labels = labels.squeeze().to(device)
 
             optimizer.zero_grad()
             outputs = model(images) 
@@ -199,8 +199,8 @@ def validate_model(model, dataloader, criterion, device):
 
     with torch.no_grad():
         for images, labels in tqdm(dataloader, desc="Validation"):
-            images = images.to(device)
-            labels = labels.squeeze().to(device)
+#            images = images.to(device)
+#            labels = labels.squeeze().to(device)
 
             outputs = model(images)
             loss = criterion(outputs, labels)
@@ -238,8 +238,8 @@ def test_model(model, dataloader, criterion, device, hyperparams, output_file="t
 
     with torch.no_grad():
         for images, labels in tqdm(dataloader, desc="Testing"):
-            images = images.to(device)
-            labels = labels.squeeze().to(device)
+            #images = images.to(device)
+            #labels = labels.squeeze().to(device)
 
             outputs = model(images)
             loss = criterion(outputs, labels)

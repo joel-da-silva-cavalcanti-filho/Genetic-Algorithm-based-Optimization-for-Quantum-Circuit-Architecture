@@ -62,16 +62,10 @@ class QuantumCircuitSampling(Sampling):
     rotation_gate_options = ['rx_gate', 'ry_gate', 'rz_gate']
     
     def generate_layer_without_entanglement(self, n_qubits):
-        layer = []
-        for wire in range(n_qubits):
-            random_gate = np.random.choice(self.gate_options_without_cnot)
-            layer.append(random_gate)
-        
-        return layer
+       return [np.random.choice(self.gate_options_without_cnot) for wire in range(n_qubits)]
     
-    def generate_layer_fully_entangled(self, n_qubits):
-        for wire in range(n_qubits):
-            rotation_gate = np.random.choice(self.rotation_gate_options)
+    def generate_rotation_layer(self, n_qubits):
+        return [np.random.choice(self.rotation_gate_options) for wire in range(n_qubits)]
     
     def generate_disjoint_cnots(self, n_qubits):
         cnot_count_layer_one = 0
@@ -98,12 +92,12 @@ class QuantumCircuitSampling(Sampling):
         for individual in range(n_samples):
             print(f'Generating individual #{individual}')
             ansatz = []
-            n_layers = random.randint(2, 7)
+            n_layers = random.randint(4, 7)
             print(f'Generating {n_layers} layers...')
             for layer in range(n_layers): 
                 print(f'Generating layer #{layer}')
                 gate_layer = []
-                layer_type = random.randint(0,1)
+                layer_type = random.randint(0,2)
                 if layer_type == 0:
                     layer = self.generate_layer_without_entanglement(n_qubits)
                     ansatz.append(layer)
@@ -111,6 +105,9 @@ class QuantumCircuitSampling(Sampling):
                     layer_one, layer_two = self.generate_disjoint_cnots(n_qubits)
                     ansatz.append(layer_one)
                     ansatz.append(layer_two) 
+                elif layer_type == 2:
+                    layer = self.generate_rotation_layer(n_qubits)
+                    ansatz.append(layer)
                        
             X.append(ansatz)
 

@@ -6,12 +6,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
+from torch import tensor
 
 class SampledDataset4Training(Dataset):
-    def __init__(self, dataset):
+    def __init__(self, dataset, transform=None):
         images, labels = zip(*dataset)
-        self.images = torch.stack(images).squeeze(0)
-        self.labels = labels
+        labels = [label%2 for label in labels]
+        self.labels = tensor(labels)
+        self.images = torch.stack(images)
+        self.transform = transform
     
     def __len__(self):
         return len(self.labels)
@@ -20,6 +23,11 @@ class SampledDataset4Training(Dataset):
         if torch.is_tensor(index):
             index = index.tolist()
             
-        sample = {'image': self.images[index], 'label': self.labels[index]}
         
-        return sample
+        if self.transform:
+            sample = self.transform(self.images[index])
+        else:
+            sample = self.images[index]
+        
+        
+        return sample, self.labels[index]

@@ -101,7 +101,7 @@ class AnsatzCrossover(Crossover):
     
     class RemoveEquivalentAnsätze(ElementwiseDuplicateElimination):
 
-        state_vector_1 = tensor()
+        state_vector_1 = tensor([])
         state_vector_2 = tensor()
         state_vector_3 = tensor()
         state_vector_toy_test = []
