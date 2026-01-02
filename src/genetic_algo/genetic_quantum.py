@@ -12,12 +12,13 @@ import numpy as np
 import time
 
 class QuanvLayer(nn.Module):
-    def __init__(self, n_qubits, patch_size, chromosome, mode="both"):
+    def __init__(self, n_qubits, patch_size, chromosome, parameters, mode="both"):
         super().__init__()
         self.n_qubits = n_qubits
         self.patch_size = patch_size
         self.mode = mode
         self.chromosome = chromosome
+        self.ansatz_params = parameters
 
         # Como definir o meu circuito em termos de tensores?
         self.qlayer = AnsatzSimulation(n_qubits)
@@ -25,7 +26,7 @@ class QuanvLayer(nn.Module):
     def quanv_2d(self, x):
         #print(type(x))
         #start_time = time.perf_counter()
-        outputs = [[self.qlayer.simulate_circuit(patch, 'rx', self.chromosome) for patch in patches] for patches in x]
+        outputs = [[self.qlayer.simulate_circuit(patch, 'rx', self.chromosome, self.ansatz_params) for patch in patches] for patches in x]
         #end_time = time.perf_counter()
         #print(f'Image quantum processing time: {end_time - start_time}')
 

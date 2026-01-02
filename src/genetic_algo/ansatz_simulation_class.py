@@ -156,8 +156,9 @@ class AnsatzSimulation():
         return expectation
 
 
-    def simulate_circuit(self, input: torch.Tensor, embedding_type: str, ansatz_chromosome: list):
+    def simulate_circuit(self, input: torch.Tensor, embedding_type: str, ansatz_chromosome: list, parameters: torch.Tensor):
         layer_count = 0
+        angle_count = 0
         #print('Starting ansatz simulation...')
         #start_time = time.perf_counter()
         state_vector = self.uniformAngleEmbedding(input, embedding_type).view((2,)*self.n_qubits)
@@ -171,8 +172,9 @@ class AnsatzSimulation():
                 if gate in self.gate_operation:
                     state_vector = self.simulate_one_qubit_gate(self.gate_operation[gate], state_vector, qubit_count)
                 elif gate in self.rotation_function:
-                    random_angle = random.uniform(0.0, 1.5)*math.pi
-                    state_vector = self.simulate_rotation_gate(gate, state_vector, qubit_count, random_angle)
+                   # random_angle = random.uniform(0.0, 1.5)*math.pi
+                    state_vector = self.simulate_rotation_gate(gate, state_vector, qubit_count, parameters[angle_count])
+                    angle_count+=1
                 elif gate is not None:
                     if gate[0:4] == 'ctrl' or gate[0:4] == 'trgt':
                         if not cnot_stack:
