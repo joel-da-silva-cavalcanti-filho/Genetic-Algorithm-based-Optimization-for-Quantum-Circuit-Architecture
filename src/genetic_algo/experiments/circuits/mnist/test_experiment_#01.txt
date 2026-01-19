@@ -1,0 +1,12 @@
+Generation #1
+[[['t', 'ry_gate', 'ctrl_0', 'trgt_0'], ['ry_gate', 'rx_gate', 'ry_gate', 'ry_gate'], ['ctrl_0', 'trgt_0', 't', 'pauli_x'], ['ctrl_0', 'trgt_0', 'ctrl_1', 'trgt_1'], ['pauli_y', 'ctrl_0', 'trgt_0', 'pauli_z'], ['ry_gate', 'pauli_z', 'pauli_x', 'hadamard'], ['rz_gate', 'rz_gate', 'rz_gate', 'rz_gate'], ['pauli_x', 'hadamard', 'hadamard', 'pauli_x'], ['phase', 't', 't', 'pauli_x'], ['pauli_z', 'phase', 'hadamard', 't'], ['ctrl_0', 'trgt_0', 'ctrl_1', 'trgt_1'], ['rz_gate', 'ctrl_0', 'trgt_0', 'phase']], [['ctrl_0', 'trgt_0', 'hadamard', 'pauli_x'], ['phase', 'phase', 'rz_gate', 'pauli_z'], ['pauli_y', 'phase', 'ctrl_0', 'trgt_0'], ['ry_gate', 'ry_gate', 'ry_gate', 'ry_gate'], ['ctrl_0', 'trgt_0', 'ctrl_1', 'trgt_1'], ['phase', 'ctrl_0', 'trgt_0', 'pauli_x'], ['rx_gate', 'pauli_z', 'pauli_x', 'phase'], ['ctrl_0', 'trgt_0', 'ctrl_1', 'trgt_1'], ['t', 'ctrl_0', 'trgt_0', 'pauli_x']]]
+
+Gen #1 Scores
+0.970954356846473 0.9448818897637795
+
+Generation #2
+[[['ctrl_0', 'trgt_0', 'hadamard', 'pauli_x'], ['phase', 'phase', 'rz_gate', 'pauli_z'], ['pauli_y', 'phase', 'ctrl_0', 'trgt_0'], ['ry_gate', 'ry_gate', 'ry_gate', 'ry_gate'], ['ctrl_0', 'trgt_0', 'ctrl_1', 'trgt_1'], ['phase', 'ctrl_0', 'trgt_0', 'pauli_x'], ['rx_gate', 'pauli_z', 'pauli_x', 'phase'], ['ctrl_0', 'trgt_0', 'ctrl_1', 'trgt_1'], ['t', 'ctrl_0', 'trgt_0', 'pauli_x'], ['ctrl_0', 'trgt_0', 't', 'pauli_x'], ['ctrl_0', 'trgt_0', 'ctrl_1', 'trgt_1'], ['pauli_y', 'ctrl_0', 'trgt_0', 'pauli_z'], ['ry_gate', 'pauli_z', 'pauli_x', 'hadamard'], ['rz_gate', 'rz_gate', 'rz_gate', 'rz_gate'], ['pauli_x', 'hadamard', 'hadamard', 'pauli_x'], ['phase', 't', 't', 'pauli_x'], ['pauli_z', 'phase', 'hadamard', 't'], ['ctrl_0', 'trgt_0', 'ctrl_1', 'trgt_1'], ['rz_gate', 'ctrl_0', 'trgt_0', 'phase']], [['t', 'ry_gate', 'ctrl_0', 'trgt_0'], ['ry_gate', 'rx_gate', 'ry_gate', 'ry_gate']]]
+
+Gen #2 Scores
+0.8039867109634552 0.8039867109634552
+
